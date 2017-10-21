@@ -73,7 +73,6 @@ fn set_d2d_resources(app: &mut MyApp) {
         } else if app.factory.is_null() {
             error_msgbox("There is no render target!")
         } else {
-            let hwnd = app.hwnd;
             let mut rect: RECT = WinStruct::default();
 
             let mut resources = Resources {
@@ -82,7 +81,7 @@ fn set_d2d_resources(app: &mut MyApp) {
                 brush2: null_mut(),
             };
 
-            GetClientRect(hwnd, &mut rect as *mut RECT);
+            GetClientRect(app.hwnd, &mut rect as *mut RECT);
 
             let d2d_rect = D2D1_SIZE_U {
                 width: (rect.right - rect.left) as u32,
@@ -100,7 +99,7 @@ fn set_d2d_resources(app: &mut MyApp) {
             };
 
             let hwnd_render_properties = D2D1_HWND_RENDER_TARGET_PROPERTIES {
-                hwnd: hwnd,
+                hwnd: app.hwnd,
                 pixelSize: d2d_rect,
                 presentOptions: D2D1_PRESENT_OPTIONS_NONE,
             };
