@@ -169,11 +169,11 @@ impl WinStruct for D2D1_POINT_2F {
     }
 }
 
-pub trait Color {
+pub trait Brush {
     fn solid_color(red: f32, green: f32, blue: f32) -> Self;
 }
 
-impl Color for D2D1_COLOR_F {
+impl Brush for D2D1_COLOR_F {
     fn solid_color(red: f32, green: f32, blue: f32) -> Self {
         D2D1_COLOR_F {
             r: red,
