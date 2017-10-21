@@ -105,8 +105,8 @@ fn set_d2d_resources(app: &mut MyApp) {
                 presentOptions: D2D1_PRESENT_OPTIONS_NONE,
             };
 
-            let gray = Color::solid_color(0.345, 0.423, 0.463);
-            let red = Color::solid_color(0.941, 0.353, 0.392);
+            let gray = Brush::solid_color(0.345, 0.423, 0.463);
+            let red = Brush::solid_color(0.941, 0.353, 0.392);
 
 
             let factory: &mut ID2D1Factory = &mut *app.factory;
@@ -138,7 +138,7 @@ fn on_paint(app: &mut MyApp) -> HRESULT {
     unsafe {
         let d2d1_matrix: D2D1_MATRIX_3X2_F = WinStruct::default();
 
-        let white = Color::solid_color(255.0, 255.0, 255.0);
+        let white = Brush::solid_color(255.0, 255.0, 255.0);
 
         let mut render_size = D2D1_SIZE_F {
             width: 0.0,
