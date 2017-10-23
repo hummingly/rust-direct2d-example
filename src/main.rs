@@ -45,6 +45,20 @@ pub struct MyApp {
     hwnd: HWND,
 }
 
+impl MyApp {
+    fn initialized() -> Self {
+        MyApp {
+            factory: null_mut(),
+            hwnd: null_mut(),
+            resources: Resources {
+                render_target: null_mut(),
+                brush1: null_mut(),
+                brush2: null_mut(),
+            },
+        }
+    }
+}
+
 //D2D1 SETUP
 fn set_d2d1_factory(app: &mut MyApp) {
     let mut factory: *mut c_void = null_mut();
@@ -73,6 +87,7 @@ fn set_d2d_resources(app: &mut MyApp) {
         } else if app.factory.is_null() {
             error_msgbox("There is no render target!")
         } else {
+            let hwnd = app.hwnd;
             let mut rect: RECT = WinStruct::default();
 
             let mut resources = Resources {
@@ -81,7 +96,7 @@ fn set_d2d_resources(app: &mut MyApp) {
                 brush2: null_mut(),
             };
 
-            GetClientRect(app.hwnd, &mut rect as *mut RECT);
+            GetClientRect(hwnd, &mut rect as *mut RECT);
 
             let d2d_rect = D2D1_SIZE_U {
                 width: (rect.right - rect.left) as u32,
@@ -99,13 +114,13 @@ fn set_d2d_resources(app: &mut MyApp) {
             };
 
             let hwnd_render_properties = D2D1_HWND_RENDER_TARGET_PROPERTIES {
-                hwnd: app.hwnd,
+                hwnd: hwnd,
                 pixelSize: d2d_rect,
                 presentOptions: D2D1_PRESENT_OPTIONS_NONE,
             };
 
-            let gray = Brush::solid_color(0.345, 0.423, 0.463);
-            let red = Brush::solid_color(0.941, 0.353, 0.392);
+            let gray = Color::solid_color(0.345, 0.423, 0.463);
+            let red = Color::solid_color(0.941, 0.353, 0.392);
 
 
             let factory: &mut ID2D1Factory = &mut *app.factory;
@@ -137,7 +152,7 @@ fn on_paint(app: &mut MyApp) -> HRESULT {
     unsafe {
         let d2d1_matrix: D2D1_MATRIX_3X2_F = WinStruct::default();
 
-        let white = Brush::solid_color(255.0, 255.0, 255.0);
+        let white = Color::solid_color(255.0, 255.0, 255.0);
 
         let mut render_size = D2D1_SIZE_F {
             width: 0.0,
@@ -243,7 +258,7 @@ unsafe extern "system" fn wndproc(
     lparam: LPARAM,
 ) -> LRESULT {
     let app_ptr = GetWindowLongPtrW(hwnd, 0);
-    let app: &mut MyApp = &mut *(app_ptr as *mut MyApp);
+    let mut app: &mut MyApp = &mut *(app_ptr as *mut MyApp);
     match message {
         WM_PAINT => {
             set_d2d_resources(app);
@@ -271,6 +286,7 @@ unsafe extern "system" fn wndproc(
             0
         }
         WM_DESTROY => {
+            release_resources(&mut app);
             PostQuitMessage(0);
             0
         }
@@ -287,7 +303,7 @@ pub fn init_class() {
             style: CS_HREDRAW | CS_VREDRAW,
             lpfnWndProc: Some(wndproc),
             cbClsExtra: 0,
-            cbWndExtra: mem::size_of::<LONG_PTR>() as INT32,
+            cbWndExtra: mem::size_of::<MyApp>() as INT32,
             hInstance: GetModuleHandleW(null_mut()),
             hIcon: 0 as HICON,
             hCursor: LoadCursorW(null_mut(), IDC_ARROW),
@@ -341,16 +357,8 @@ fn set_window(app: &mut MyApp) {
 
 fn main() {
     unsafe {
-        let mut app = MyApp {
-            factory: null_mut(),
-            hwnd: null_mut(),
-            resources: Resources {
-                render_target: null_mut(),
-                brush1: null_mut(),
-                brush2: null_mut(),
-            },
-        };
-
+        let mut app = MyApp::initialized();
+        
         let class = "direct2d_example".to_wide();
         let window = "Hello World!".to_wide();
 
@@ -359,7 +367,6 @@ fn main() {
         set_window(&mut app);
 
         set_d2d1_factory(&mut app);
-        set_d2d_resources(&mut app);
 
         let mut msg: MSG = WinStruct::default();
 
@@ -367,6 +374,5 @@ fn main() {
             TranslateMessage(&msg as *const MSG);
             DispatchMessageW(&msg as *const MSG);
         }
-        release_resources(&mut app);
     }
 }
