@@ -103,15 +103,7 @@ fn set_d2d_resources(app: &mut MyApp) {
                 height: (rect.bottom - rect.top) as u32,
             };
 
-            let pixel_format = D2D1_PIXEL_FORMAT {
-                alphaMode: D2D1_ALPHA_MODE_PREMULTIPLIED,
-                ..WinStruct::default()
-            };
-
-            let render_properties = D2D1_RENDER_TARGET_PROPERTIES {
-                pixelFormat: pixel_format,
-                ..WinStruct::default()
-            };
+            let render_properties: D2D1_RENDER_TARGET_PROPERTIES = WinStruct::default();
 
             let hwnd_render_properties = D2D1_HWND_RENDER_TARGET_PROPERTIES {
                 hwnd: hwnd,
